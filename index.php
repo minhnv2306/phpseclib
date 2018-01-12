@@ -13,10 +13,12 @@ $pubKey = new Crypt_RSA();
 $pubKey->loadKey('-----BEGIN PUBLIC KEY----- MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDG0s64mm9ZLHcCa+IFFYYvcap0 xmri9hytJx1O+rI0JFF23bApK//sWAWgeEvbEBAUGLBKibsJ50iIq+hALoK5O1qy 6CIXMoVfiIVqNdA/L3ZWW0yCqNh/uR5IDkoMd2VzWlWa2Ue8ExV1T0AZ2OVu0AYL fS7nF1Uk549BSJNoaQIDAQAB -----END PUBLIC KEY-----');
 
 echo "the private key for the CA cert (can be discarded):\r\n\r\n";
+echo "<br>";
 echo $CAPrivKey;
+echo "<br>";
 echo "\r\n\r\n";
 echo $pubKey;
-
+echo "<br>";
 
 
 
@@ -25,7 +27,7 @@ echo $pubKey;
 
 // create a self-signed cert that'll serve as the CA
 
-// Chua biết load luôn CA cert vào như thế nào @@
+// CA tự kí cho chính nó
 $subject = new File_X509();
 $subject->setPublicKey($pubKey);
 $subject->setDNProp('id-at-organizationName', 'Minh NV Cert');
@@ -42,6 +44,7 @@ $x509->makeCA();
 
 $result = $x509->sign($issuer, $subject);
 echo "the CA cert to be imported into the browser is as follows:\r\n\r\n";
+echo "<br>";
 echo $x509->saveX509($result);
 echo "\r\n\r\n";
 echo "<br>";
@@ -52,35 +55,35 @@ echo "<br>";
 
 
 
-
-
 // create private key / x.509 cert for stunnel / website
 // Ký cho các đối tượng nào
-$privKey = new Crypt_RSA();
-extract($privKey->createKey());
-$privKey->loadKey($privatekey);
+$privKeySubject = new Crypt_RSA();
+extract($privKeySubject->createKey());
+$privKeySubject->loadKey($privatekey);
 
-$pubKey = new Crypt_RSA();
-$pubKey->loadKey($publickey);
-$pubKey->setPublicKey();
+$pubKeySubject = new Crypt_RSA();
+$pubKeySubject->loadKey($publickey);
+$pubKeySubject->setPublicKey();
 
 $subject = new File_X509();
-$subject->setPublicKey($pubKey);
+$subject->setPublicKey($pubKeySubject);
 $subject->setDNProp('id-at-organizationName', 'My web');
-$subject->setDomain('minhnv2306');
+$subject->setDomain('minhnv1');
 
 $issuer = new File_X509();
 $issuer->setPrivateKey($CAPrivKey);
 $issuer->setDN($CASubject);
 
 $x509 = new File_X509();
-$x509->setStartDate('-1 month');
-$x509->setEndDate('+1 year');
+$x509->setStartDate('1/1/2018');
+$x509->setEndDate('1/1/2019');
 $x509->setSerialNumber(chr(1));
 
 $result = $x509->sign($issuer, $subject);
 echo "the stunnel.pem contents are as follows:\r\n\r\n";
-echo $privKey->getPrivateKey();
+echo "<br>";
+echo $privKeySubject->getPrivateKey();
 echo "\r\n";
+echo "<br>";
 echo $x509->saveX509($result);
 echo "\r\n";
